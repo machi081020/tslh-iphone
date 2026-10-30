@@ -362,6 +362,24 @@ textarea.fi.ml{height:34px;min-height:34px;max-height:240px;padding:7px 10px;lin
 
 .m .mr p.vc2.vcx{display:flex;align-items:center;gap:12px;min-width:150px;padding-right:16px}.vcx .vcg{width:20px;height:20px;flex:none;fill:currentColor}.m .mr p.vc.vcx .vcg{width:24px;height:24px}.vc.vcx .vci{background:none!important}.vcx.s{color:#12b04a}.vcx.e{color:#111}.vcx.x{color:#9a9a9a}.vcx .vct{margin-left:auto;text-align:right;color:#111}.vcx .vct span{display:block}.vc.vcx .vci svg{fill:currentColor;width:24px;height:24px}.vc.vcx .vct{line-height:1.35;font-size:15px}
 .imge{visibility:hidden}
+
+/* v4.29 모바일 화면 최대 활용: 안전 영역(노치·상태바·홈 인디케이터) + 주소창 변화에 맞는 높이. 확대·잘라내기 없음 */
+.ph{--sat:0px;--sab:0px}
+.sbar{height:calc(54px + var(--sat));padding-top:calc(19px + var(--sat))}
+.scr{padding-top:calc(54px + var(--sat))}
+.toast{top:calc(64px + var(--sat))}.bnr{top:calc(56px + var(--sat))}
+.svbar{top:calc(10px + var(--sat))}.svhd{top:calc(20px + var(--sat))}.svz{top:calc(70px + var(--sat))}
+.hib{touch-action:none;-webkit-touch-callout:none;padding-bottom:calc(8px + var(--sab))}
+@media(max-width:520px){
+body:not(.adm){min-height:0}
+body:not(.adm) #main{min-height:0;height:100vh;height:100dvh;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+#main .ph{width:100%;height:100vh;height:100dvh;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+}
+@media(min-width:521px) and (max-height:520px) and (pointer:coarse){
+body:not(.adm){min-height:0}
+body:not(.adm) #main{min-height:0;height:100vh;height:100dvh;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+#main .ph{width:413px;max-width:100%;height:100vh;height:100dvh;border:0;border-radius:0;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}#main .di{display:none}
+}
 </style></head><body><div id="main"></div><script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],uid=()=>Math.random().toString(36).slice(2,9),pad=n=>String(n).padStart(2,'0');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1193,6 +1211,20 @@ function Phone(el,onScr){
  let evWas=false;const evTmr=setInterval(()=>{if(el.isConnected)evWas=true;else{if(evWas)clearInterval(evTmr);return}evTick()},200);
  draw();setTimeout(()=>fire('load'),0);
  return{draw,nav(k,o){const e=s.ev;if(e&&e.call){callClear(e);e.exited=true}s.ev=null;if(s.inc){clearTimeout(s.inc.t);s.inc=null}actv.clear();clearTimeout(svT);s.sv=null;s.warn=0;s.sheet=null;s.zm=null;resetCompose();(NAVS[k]||NAVS.home)();if(o&&o.room){const R=roomOf(o.room);if(R){s.scr=R.kind=='kakao'?'kakao':R.kind=='dm'?'insta':'messages'}evR('r:'+o.room).pvf=1;openRoom(o.room);return}draw()},state:s,api:{evStatus,evRec:ref=>({...(EVR.get(ref)||{})}),startCall,callEnd,incAccept,kplan,runCall:(o,dir)=>{const ce=D.callEvents.find(x=>x.id==(o&&o.id))||ceFor(o);if(!ce)return false;return dir=='in'?runCallAuto({id:'pv:'+ce.id,app:'phone',cid:ce.cid,name:ce.name,num:ce.num,script:ce.script,ring:ce.ring,secs:20,dir:'in'}):startCall({ev:ce,dir:'out',pv:1})}}}}
+
+/* v4.29 Android Chrome 전용: 하단 홈 바를 길게 누르면 전체 화면 켜기/끄기. 짧게 탭하면 기존 홈 이동 그대로. 카카오톡 인앱·iPhone·미지원 환경에서는 아무것도 하지 않음 */
+(function(){try{
+ const ua=navigator.userAgent||'';if(!/Android/i.test(ua)||/KAKAOTALK/i.test(ua))return;
+ const de=document.documentElement,rq=de.requestFullscreen||de.webkitRequestFullscreen;if(!rq||document.fullscreenEnabled===false)return;
+ let t=0,armed=false,sx=0,sy=0,sup=0;const isH=e=>e.target&&e.target.closest&&e.target.closest('.hib');
+ const tog=()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}else{const r=rq.call(de,{navigationUI:'hide'});r&&r.catch&&r.catch(()=>{})}}catch(e){}};
+ document.addEventListener('pointerdown',e=>{if(!isH(e)||e.button>0)return;armed=false;sx=e.clientX;sy=e.clientY;clearTimeout(t);t=setTimeout(()=>{armed=true;try{navigator.vibrate&&navigator.vibrate(12)}catch(x){}},550)},true);
+ document.addEventListener('pointermove',e=>{if(t&&Math.hypot(e.clientX-sx,e.clientY-sy)>12){clearTimeout(t);t=0;armed=false}},true);
+ document.addEventListener('pointerup',e=>{clearTimeout(t);t=0;if(armed){armed=false;sup=Date.now();tog()}},true);
+ document.addEventListener('pointercancel',()=>{clearTimeout(t);t=0;armed=false},true);
+ document.addEventListener('click',e=>{if(sup&&Date.now()-sup<700){sup=0;if(isH(e)){e.stopPropagation();e.preventDefault()}}},true);
+ document.addEventListener('contextmenu',e=>{if(isH(e))e.preventDefault()},true);
+}catch(e){}})();
 /* 공개 사이트용 시작 코드: 편집 기능 코드가 들어 있지 않은 방문자 전용 시작 코드예요. 주소에 어떤 값을 붙여도 편집 화면은 열리지 않아요. */
 function startVisitor(){const m=$('#main');m.innerHTML='<div class="ph" id="p1"></div>';window.PH=Phone($('#p1'))}
 (async()=>{await load(false,false);loadW();setInterval(loadW,18e5);startVisitor()})();
