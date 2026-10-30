@@ -373,13 +373,15 @@ textarea.fi.ml{height:34px;min-height:34px;max-height:240px;padding:7px 10px;lin
 @media(max-width:520px){
 body:not(.adm){min-height:0}
 body:not(.adm) #main{min-height:0;height:100vh;height:100dvh;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-#main .ph{width:100%;height:100vh;height:100dvh;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+#main .ph{width:100%;height:100vh;height:100dvh}
 }
 @media(min-width:521px) and (max-height:520px) and (pointer:coarse){
 body:not(.adm){min-height:0}
 body:not(.adm) #main{min-height:0;height:100vh;height:100dvh;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-#main .ph{width:413px;max-width:100%;height:100vh;height:100dvh;border:0;border-radius:0;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}#main .di{display:none}
+#main .ph{width:413px;max-width:100%;height:100vh;height:100dvh;border:0;border-radius:0}#main .di{display:none}
 }
+/* v4.30 상단·하단 안전 영역은 '전체 화면(Android)' 상태에서만 적용 → 일반 브라우저에서는 상태바·앱 화면이 원래 위치(v4.28)와 동일 */
+@media(max-width:520px),(min-width:521px) and (max-height:520px) and (pointer:coarse){:fullscreen #main .ph{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}}
 </style></head><body><div id="main"></div><script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],uid=()=>Math.random().toString(36).slice(2,9),pad=n=>String(n).padStart(2,'0');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -811,7 +813,7 @@ function Phone(el,onScr){
   <div class="bar"><svg class="${lk?'lk':''}" data-go="like:${p.id}" viewBox="0 0 24 24" aria-label="좋아요">${PI.heart.replace(/<path /,'<path ')}</svg><svg data-go="cm:${p.id}" viewBox="0 0 24 24" aria-label="댓글"><path d="M20.600 16.800A9.300 9.300 0 1 0 17 20.600L21.500 22z"/></svg><svg viewBox="0 0 24 24" style="cursor:default" aria-label="공유"><path d="M21.500 3L10.300 13.800M21.500 3l-6.800 18-4.400-7.200L3 9.500z"/></svg>${n>1?`<span class="dts3" id="dts-${p.id}">${ph.map((_,i)=>`<i class="${i==cur?'on':''}"></i>`).join('')}</span>`:''}</div>
   <div class="t"><b>좋아요 ${fmt(+p.likes+(lk?1:0))}개</b><div><b>${esc(nm)}</b> ${esc(p.caption)}</div>${(()=>{const n=(p.cmtTotal!=null&&p.cmtTotal!=='')?Math.max(0,Math.floor(+p.cmtTotal)||0):p.comments.length;return n?`<small data-go="cm:${p.id}" style="cursor:pointer">댓글 ${n}개 모두 보기</small>`:''})()}<small>${esc(pdisp(p))}</small></div></div>`}
  const cAuth=c=>{const u=igu(c.uid);return u?{n:u.user,u}:{n:c.user||'삭제된 사용자',u:null}};
- function cmSheet(){const p=D.posts.find(x=>x.id==s.cm);if(!p)return'';return`<div class="sh"><div class="hd" style="justify-content:space-between"><b style="font-style:normal;font-family:inherit;font-size:15px;margin:0 auto">댓글</b><u data-go="cmx">×</u></div><div class="ls">${p.comments.length?p.comments.map(c=>{const a=cAuth(c);return`<div class="row x" style="align-items:flex-start"><span data-go="${c.uid?'pf:'+c.uid:'x'}">${!a.u&&c.custom?igDef(34):igImg(a.u,34)}</span><div style="flex:1;font-size:13px"><b>${esc(a.n)}</b> <span style="color:#888">${esc(c.time||'')}</span><div style="font-size:14px;margin-top:2px">${esc(c.text)}</div></div><svg viewBox="0 0 24 24" width="14" height="14" style="fill:none;stroke:#888;stroke-width:2;margin-top:6px">${heart}</svg></div>`}).join(''):'<div style="text-align:center;color:#999;padding:40px">아직 댓글이 없어요</div>'}</div><div class="cin">댓글 추가…</div></div>`}
+ function cmSheet(){const p=D.posts.find(x=>x.id==s.cm);if(!p)return'';return`<div class="sh"><div class="hd" style="justify-content:space-between"><b style="font-style:normal;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-size:15px;margin:0 auto">댓글</b><u data-go="cmx">×</u></div><div class="ls">${p.comments.length?p.comments.map(c=>{const a=cAuth(c);return`<div class="row x" style="align-items:flex-start"><span data-go="${c.uid?'pf:'+c.uid:'x'}">${!a.u&&c.custom?igDef(34):igImg(a.u,34)}</span><div style="flex:1;font-size:13px"><b>${esc(a.n)}</b> <span style="color:#888">${esc(c.time||'')}</span><div style="font-size:14px;margin-top:2px">${esc(c.text)}</div></div><svg viewBox="0 0 24 24" width="14" height="14" style="fill:none;stroke:#888;stroke-width:2;margin-top:6px">${heart}</svg></div>`}).join(''):'<div style="text-align:center;color:#999;padding:40px">아직 댓글이 없어요</div>'}</div><div class="cin">댓글 추가…</div></div>`}
  /* 인물 프로필에서 연 게시글 상세의 상하 이동 목록: 그 사람의 게시글만, 피드(자동정렬 중이면 그 결과)와 같은 순서 */
  const personPosts=personFeed;
  const gridTile=p=>{const ph=pphs(p);return`<div class="gt" data-go="open:${p.id}">${ph.length?fr(ph[0].photo,ph[0].photoCrop,4/5,'width:100%'):'<div style="aspect-ratio:4/5;background:#ddd"></div>'}${ph.length>1?`<span class="mi2" title="사진 ${ph.length}장">${pic('multi',18,2)}</span>`:''}</div>`};
