@@ -573,7 +573,9 @@ let IMS=s=>s;
 const SEEN=new Set();
 if(typeof document!=='undefined'){document.addEventListener('load',e=>{const t=e.target;if(t&&t.tagName==='IMG'){const u=t.getAttribute('src');if(u)SEEN.add(u)}},true);document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG')t.classList.add('imge')},true)}
 const lzy=u=>SEEN.has(u)?'':' loading="lazy"';
-const im=(src,c,fa,ea)=>{if(!src)return'';const u=IMS(src),lz=ea?'':lzy(u);if(!c||!c.ar)return`<img draggable="false"${lz} src="${u}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;
+const im=(src,c,fa,ea,rc)=>{if(!src)return'';const u=IMS(src),lz=ea?'':lzy(u);if(!c||!c.ar)return`<img draggable="false"${lz} src="${u}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;
+ /* rc=1(스토리): 크롭 위치를 '실제 화면 비율'(.sv 컨테이너)로 계산해요 → 화면 비율이 393:852가 아니어도 사진이 늘어나지 않아요. 393:852 화면에서는 아래 기존 계산과 결과가 같아요 */
+ if(rc&&c.ar>0){const A=c.ar,H=`max(100cqh,100cqw/${A})*${c.z}`;return`<img draggable="false"${lz} src="${u}" alt="" style="position:absolute;max-width:none;aspect-ratio:${A};height:calc(${H});width:auto;left:calc((100cqw - (${H})*${A})*${c.px});top:calc((100cqh - (${H}))*${c.py})">`}
  let w,h;if(c.ar>fa){h=1;w=c.ar/fa}else{w=1;h=fa/c.ar}w*=c.z;h*=c.z;
  return`<img draggable="false"${lz} src="${u}" alt="" style="position:absolute;max-width:none;width:${w*100}%;height:${h*100}%;left:${(1-w)*100*c.px}%;top:${(1-h)*100*c.py}%">`};
 const fr=(src,c,fa,st,cls)=>`<div class="fr ${cls||''}" style="aspect-ratio:${fa};${st||''}">${im(src,c,fa)}</div>`;
@@ -983,7 +985,7 @@ function Phone(el,onScr){
   return'<div class="scr"></div>'}
  /* 스토리 뷰어 오버레이 */
  function ovl(){const v=s.sv;if(!v)return'';const id=v.list[v.ui],u=igu(id),sts=stOf(id);if(!u||!sts.length)return'';const st=sts[v.si]||sts[0],el2=Math.min(6,(Date.now()-v.t0)/1000);
-  return`<div class="sv" id="sv"><div class="svbg">${im(st.photo,st.photoCrop,393/852)}</div>${(st.texts||[]).map(t=>stText(t)).join('')}<div class="svbar">${sts.map((x,i)=>`<span><b style="${i<v.si?'width:100%':i==v.si?`animation:sp 6s linear -${el2.toFixed(2)}s forwards`:'width:0'}"></b></span>`).join('')}</div><div class="svhd">${igImg(u,32)}<b>${esc(u.user)}</b><small>${esc(st.time||'')}</small><u data-go="svx" aria-label="닫기">×</u></div><div class="svz l" data-go="svp"></div><div class="svz r" data-go="svn"></div><div class="svft">메시지 보내기…</div></div>`}
+  return`<div class="sv" id="sv"><div class="svbg">${im(st.photo,st.photoCrop,393/852,0,1)}</div>${(st.texts||[]).map(t=>stText(t)).join('')}<div class="svbar">${sts.map((x,i)=>`<span><b style="${i<v.si?'width:100%':i==v.si?`animation:sp 6s linear -${el2.toFixed(2)}s forwards`:'width:0'}"></b></span>`).join('')}</div><div class="svhd">${igImg(u,32)}<b>${esc(u.user)}</b><small>${esc(st.time||'')}</small><u data-go="svx" aria-label="닫기">×</u></div><div class="svz l" data-go="svp"></div><div class="svz r" data-go="svn"></div><div class="svft">메시지 보내기…</div></div>`}
  const incH=()=>{const i=s.inc;if(!i)return'';return`<div class="icb" id="icb"><span class="icav">${i.photo?fr(i.photo,i.crop,1,'width:46px;border-radius:50%'):`<span class="icin">${esc((i.name||'?')[0])}</span>`}</span><div class="ict"><small>휴대전화</small><b>${esc(i.name)}</b></div><button class="icd" data-go="incd" aria-label="거절">${pic('end',26,1)}</button><button class="ica" data-go="inca" aria-label="수락">${pic('acc',24,1)}</button></div>`};
  /* ---------- 그리기 ---------- */
  const capSc=()=>{el.querySelectorAll('[data-sk]').forEach(n=>{s.sc[n.dataset.sk]=n.scrollTop});const r=el.querySelector('.rail');if(r)s.railL=r.scrollLeft};
